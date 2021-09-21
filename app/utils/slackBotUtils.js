@@ -1,6 +1,6 @@
 const {
   timeOffMsg
-} = require('./constants');
+} = require('../constants/messageTemplates');
 
 const getUserName = ({ bot, channel, user }) => {
   if (!user) {

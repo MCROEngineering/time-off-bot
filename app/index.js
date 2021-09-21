@@ -7,9 +7,9 @@ const bodyParser = require('body-parser');
 const { WebClient } = require('@slack/web-api');
 const SlackBot = require('slackbots');
 
-const { getUserName, getDates } = require('./slackBotUtils');
-const { authorize, addEvent } = require('./calendatUtils');
-const { credentials } = require('./credentials');
+const { getUserName, getDates } = require('./utils/slackBotUtils');
+const { authorize, addEvent } = require('./utils/calendatUtils');
+const { credentials } = require('./constants/credentials');
 
 const port = 3000;
 const botName = 'time-off-bot';
