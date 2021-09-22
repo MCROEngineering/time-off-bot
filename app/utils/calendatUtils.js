@@ -1,21 +1,19 @@
 const { google } = require('googleapis');
 const open = require('open');
 
-const calendarId = 'mcro-e.com_ijciqv7comrd3lt70ab2jfhlu0@group.calendar.google.com';
-const SCOPES = ['https://www.googleapis.com/auth/calendar.events'];
+const { config } = require('../constants/config');
 
-const authorize = (credentials, userName) => {
-  const { client_id, client_secret, redirect_uris } = credentials;
+const authorize = () => {
+  const client_id = process.env.CLIENT_ID;
+  const client_secret = process.env.CLIENT_SECRET;
+  const redirect_uri = process.env.REDIRECT_URI;
 
   const oAuth2Client = new google.auth.OAuth2(
-      client_id, client_secret, redirect_uris[0]);
+      client_id, client_secret, redirect_uri);
 
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: SCOPES,
-    state: {
-      client_id: userName
-    }
+    scope: config.scopes
   });
 
   open(authUrl);
@@ -52,11 +50,11 @@ const addEvent = (auth, summary, start_date, end_date) => {
   const event = {
     'summary': summary,
     'start': {
-      'dateTime': start_date,
+      'date': start_date,
       'timeZone': 'Europe/Bucharest',
     },
     'end': {
-      'dateTime': end_date,
+      'date': end_date,
       'timeZone': 'Europe/Bucharest',
     }
   };
@@ -65,7 +63,7 @@ const addEvent = (auth, summary, start_date, end_date) => {
 
   calendar.events.insert({
     auth: this.auth,
-    calendarId: calendarId,
+    calendarId: process.env.CALENDAR_ID,
     resource: event,
   }, (err, event) => {
     if (err) {

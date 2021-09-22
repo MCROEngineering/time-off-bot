@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const { google } = require('googleapis');
 const cors  = require('cors');
@@ -9,18 +11,20 @@ const SlackBot = require('slackbots');
 
 const { getUserName, getDates } = require('./utils/slackBotUtils');
 const { authorize, addEvent } = require('./utils/calendatUtils');
-const { credentials } = require('./constants/credentials');
 
 const port = 3000;
-const botName = 'time-off-bot';
-const channel = 'timeoff-bot-test';
-const token = 'xoxb-127110982515-2508655825140-F9dakY81bnAdfPRDijC0oKxE';
+const channel = process.env.CHANNEL;
+const token = process.env.BOT_TOKEN;
+
+let startDateGlobal = '';
+let endDateGlobal = '';
+let userNameGlobal = '';
 
 const app = express();
 const web = new WebClient(token);
 const bot = new SlackBot({
   token: token,
-  name: botName
+  name: process.env.BOT_NAME
 });
 
 app.use(cors());
@@ -30,19 +34,20 @@ app.use(bodyParser.json());
 // App Endpoints
 
 app.get('/getCode', async (req, res) => {
-  const {client_secret, client_id, redirect_uris} = credentials.web;
   const queryURL = new urlParse(req.url);
   const code = queryParse.parse(queryURL.query).code;
 
-  const oauth2Client = new google.auth.OAuth2(
-      client_id, client_secret, redirect_uris[0]);
+  const client_id = process.env.CLIENT_ID;
+  const client_secret = process.env.CLIENT_SECRET;
+  const redirect_uri = process.env.REDIRECT_URI;
 
+  const oauth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uri);
   const tokens = await oauth2Client.getToken(code);
   const accessToken = tokens.tokens.access_token;
 
   oauth2Client.setCredentials({ access_token: accessToken });
 
-  addEvent(oauth2Client, 'Just a test','2021-09-25T00:00:00','2021-09-26T23:59:59')
+  addEvent(oauth2Client, `${userNameGlobal} - test`,`${startDateGlobal}`,`${endDateGlobal}`)
 });
 
 // Bot Actions
@@ -57,31 +62,28 @@ bot.on("message", (data) => {
   }
 
   const userId = data && data.user;
-
   if (!userId) {
     bot.postMessageToChannel(channel, 'Sorry, I was not able to find you');
     return;
   }
 
   (async () => {
-
     try {
       const response = await web.users.info({ user: userId });
 
       const { user } = response;
       const userName = getUserName({ bot, channel, user });
-
       const { startDate, endDate } = getDates(data.text);
 
-      console.log('startDate ------------------->> ', startDate);
-      console.log('endDate ------------------->> ', endDate);
+      userNameGlobal = userName;
+      startDateGlobal = startDate;
+      endDateGlobal = endDate;
 
-      // authorize(credentials.web, userName);
-
+      authorize();
     } catch (error) {
-      console.log('Well, that was unexpected. ' + error);
+      bot.postMessageToChannel(channel, error);
     }
   })();
 });
 
-app.listen((port), () => console.log(`<<----- APP is listening on port ${port} ----->>`));
+app.listen((port));
