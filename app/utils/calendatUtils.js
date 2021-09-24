@@ -47,16 +47,28 @@ const listEvents = (auth) => {
 };
 
 const addEvent = (auth, summary, start_date, end_date) => {
-  const event = {
-    'summary': summary,
-    'start': {
-      'date': start_date,
-      'timeZone': 'Europe/Bucharest',
-    },
-    'end': {
-      'date': end_date,
-      'timeZone': 'Europe/Bucharest',
-    }
+  const event = start_date === end_date
+    ? {
+        'summary': `${summary} - Out of office`,
+        'start': {
+          'date': start_date,
+          'timeZone': 'Europe/Bucharest',
+        },
+        'end': {
+          'date': end_date,
+          'timeZone': 'Europe/Bucharest',
+        }
+      }
+    : {
+        'summary': `${summary} - Out of office`,
+        'start': {
+          'dateTime': `${start_date}T00:00:00`,
+          'timeZone': 'Europe/Bucharest',
+        },
+        'end': {
+          'dateTime': `${end_date}T23:59:59`,
+          'timeZone': 'Europe/Bucharest',
+      }
   };
 
   const calendar = google.calendar({version: 'v3', auth});

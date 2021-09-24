@@ -12,6 +12,8 @@ const SlackBot = require('slackbots');
 const { getUserName, getDates } = require('./utils/slackBotUtils');
 const { authorize, addEvent } = require('./utils/calendatUtils');
 
+const { presentationMsg } = require('./constants/messageTemplates');
+
 const port = 3000;
 const channel = process.env.CHANNEL;
 const token = process.env.BOT_TOKEN;
@@ -47,13 +49,13 @@ app.get('/getCode', async (req, res) => {
 
   oauth2Client.setCredentials({ access_token: accessToken });
 
-  addEvent(oauth2Client, `${userNameGlobal} - test`,`${startDateGlobal}`,`${endDateGlobal}`)
+  addEvent(oauth2Client, userNameGlobal, startDateGlobal, endDateGlobal)
 });
 
 // Bot Actions
 
 bot.on("start", () => {
-  bot.postMessageToChannel(channel, 'Hello world!');
+  bot.postMessageToChannel(channel, presentationMsg);
 });
 
 bot.on("message", (data) => {
