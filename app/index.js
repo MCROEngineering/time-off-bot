@@ -17,6 +17,7 @@ const { presentationMsg } = require('./constants/messageTemplates');
 const port = 3000;
 const channel = process.env.CHANNEL;
 const token = process.env.BOT_TOKEN;
+const botName = process.env.BOT_NAME;
 
 let startDateGlobal = '';
 let endDateGlobal = '';
@@ -26,7 +27,7 @@ const app = express();
 const web = new WebClient(token);
 const bot = new SlackBot({
   token: token,
-  name: process.env.BOT_NAME
+  name: botName
 });
 
 app.use(cors());
